@@ -26,12 +26,22 @@ public class SchedulerSJF extends SchedulerBase implements Scheduler {
         if (cpu ==null || cpu.isBurstComplete()) {
             if (cpu != null && cpu.isBurstComplete()) {
                 platform.log("Process " + cpu.getName() + " burst complete");
+                if (!cpu.isExecutionComplete()) {
+                    platform.log("Process " + cpu.getName() + " not complete, adding back to queue");
+                    contextSwitches++;
+                    processesQueue.add(cpu);
+                } else {
+                    platform.log("Process " + cpu.getName() + " execution complete");
+                    contextSwitches++;
+                }
             }
             if (!processesQueue.isEmpty()) {
                 Process nextProcess = processesQueue.poll();
                 platform.log("Scheduled: " + nextProcess.getName());
                 contextSwitches++;
                 return nextProcess;
+            } else {
+                return null;
             }
         }
         return cpu;
